@@ -1,6 +1,6 @@
 [package]
 name = "redbot"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Celeo <celeodor@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -8,6 +8,7 @@ homepage = "https://github.com/celeo/redbot"
 repository = "https://github.com/celeo/redbot"
 documentation = "https://docs.rs/redbot"
 description = "Reddit API wrapper for rust."
+readme = "README.md"
 keywords = ["reddit"]
 categories = ["api-bindings"]
 exclude = ["config.example.json"]
