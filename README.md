@@ -12,7 +12,7 @@ endpoint documentation can be found [here](https://www.reddit.com/dev/api).
 
 ### Example
 
-```
+```rust
 use redbot::{Api, Config, Value};
 
 fn main() {
