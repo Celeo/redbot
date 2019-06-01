@@ -1,9 +1,13 @@
+//! Error handling. Includes a custom error type `ApiError` that
+//! contains conversions from the underlying error types that the
+//! libraries that this library relies on can generate.
+
 use reqwest;
-use serde::Deserialize;
+use std::error;
 use std::fmt;
 
 /// Wrapper for errors.
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct ApiError {
     pub source: String,
     pub message: String,
@@ -14,8 +18,14 @@ impl fmt::Display for ApiError {
         if self.source.is_empty() {
             write!(f, "API error: {}", self.message)
         } else {
-             write!(f, "API error from '{}': {}", self.source, self.message)
+            write!(f, "API error from '{}': {}", self.source, self.message)
         }
+    }
+}
+
+impl error::Error for ApiError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        None
     }
 }
 
@@ -103,4 +113,6 @@ mod tests {
 
         assert_eq!(actual, expected);
     }
+
+    // 'From' impl's tested by nature of successfully compiling
 }

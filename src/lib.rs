@@ -3,8 +3,32 @@
 //! First, create a [`Config`](struct.Config.html) struct. Then, use it to create an
 //! [`Api`](struct.Api.html) struct, which exposes several methods for querying
 //! the API.
+//!
+//! # Example
+//!
+//! ```
+//! use redbot::{Api, Config, Value};
+//!
+//! fn main() {
+//!     let config = Config::load_config("config.json").expect("Could not load confiog");
+//!     let mut api = Api::new(config);
+//!     api.do_login().expect("Could not perform login");
+//!
+//!     let mut resp = match api.query("GET", "api/v1/me/karma", None, None) {
+//!         Ok(resp) => resp,
+//!         Err(err) => panic!(err),
+//!     };
+//!     let karma_breakdown: Value = match resp.json() {
+//!         Ok(data) => data,
+//!         Err(err) => panic!(err),
+//!     };
+//!
+//!     println!("{:?}", karma_breakdown);
+//! }
+//! ```
 
 use log::debug;
+
 pub use reqwest::Method;
 use reqwest::{
     self,
@@ -20,6 +44,8 @@ pub use query_listing::QueryListingRequest;
 
 pub mod errors;
 pub use errors::ApiError;
+pub mod models;
+pub use models::subreddit::Subreddit;
 
 const RATE_LIMIT_HEADER_NAMES: [&str; 3] = [
     "X-Ratelimit-Used",
@@ -60,7 +86,7 @@ impl Config {
     ///
     /// * `path` - relative path to the file
     ///
-    /// # Example
+    /// # Examples
     ///
     /// A file called 'config.json' is has the content:
     ///
@@ -105,7 +131,7 @@ impl Api {
     ///
     /// * `config` - the configuration
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```
     /// let config = Config::load_config().expect("Could not load config");
@@ -127,7 +153,7 @@ impl Api {
     /// This method should be called after creating the struct,
     /// and before attempting to query any inforamtion from the API.
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```
     /// if let Err(err) = api.do_login() {
@@ -281,13 +307,13 @@ impl Api {
     /// Query the Reddit API via a listing endpoint.
     ///
     /// Information on listing endpoints can be found in the
-    /// [offial](https://www.reddit.com/dev/api#listings) docs.
+    /// [offial docs](https://www.reddit.com/dev/api#listings).
     ///
     /// # Arguments
     ///
     /// * `ql` - A [`QueryListingRequest`](query_listing/struct.QueryListingRequest.html) struct
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```
     /// let ql = QueryListingRequest::new("r/rust/hot", 1, 1);
@@ -349,7 +375,7 @@ impl Api {
     ///
     /// * `name` - subreddit (partial) name
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```
     /// let names = match api.search_for_subreddit("rust") {
@@ -357,7 +383,7 @@ impl Api {
     ///     Err(err) => panic!(err),
     /// }
     /// ```
-    pub fn search_for_subreddit(&self, name: &str) -> Result<Vec<String>, ApiError> {
+    pub fn search_for_subreddit(&self, name: &str) -> Result<Vec<Subreddit>, ApiError> {
         let mut resp = self.query(
             "GET",
             "api/search_reddit_names",
@@ -377,8 +403,35 @@ impl Api {
             .unwrap()
             .iter()
             .filter_map(|v| v.as_str())
-            .map(|e| e.to_owned())
-            .collect::<Vec<String>>())
+            .map(|e| Subreddit {
+                api: &self,
+                name: e.to_owned(),
+            })
+            .collect::<Vec<Subreddit>>())
+    }
+
+    /// Get a subreddit by its name.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - subreddit name
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let subreddit = match api.get_subreddit("rust") {
+    ///     Ok(sr) => sr,
+    ///     Err(err) => panic!(err),
+    /// }
+    /// ```
+    pub fn get_subreddit(&self, name: &str) -> Result<Subreddit, ApiError> {
+        let matching = self.search_for_subreddit(name)?;
+        for sr in matching {
+            if sr.name == name {
+                return Ok(sr);
+            }
+        }
+        Err(ApiError::from(String::from("Subreddit not found")))
     }
 }
 
@@ -497,6 +550,36 @@ mod tests {
         let values = get_api().query_listing(ql).unwrap();
 
         assert_eq!(values.len(), 3);
+        _m1.assert();
+    }
+
+    #[test]
+    fn search_for_subreddit() {
+        let body = "{\"names\":[\"rust1\",\"rust2\",\"rust3\"]}";
+        let _m1 = mock("GET", "/api/search_reddit_names?query=rust&exact=false")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(body)
+            .create();
+        let api = get_api();
+        let srs = api.search_for_subreddit("rust").unwrap();
+
+        assert_eq!(srs.len(), 3);
+        _m1.assert();
+    }
+
+    #[test]
+    fn get_subreddit() {
+        let body = "{\"names\":[\"rust\",\"rust1\",\"rust2\"]}";
+        let _m1 = mock("GET", "/api/search_reddit_names?query=rust1&exact=false")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(body)
+            .create();
+        let api = get_api();
+        let sr = api.get_subreddit("rust1").unwrap();
+
+        assert_eq!(sr.name, "rust1");
         _m1.assert();
     }
 }
