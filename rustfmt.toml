@@ -1,0 +1,2 @@
+# https://github.com/rust-lang/rls-vscode/issues/576
+reorder_imports = false

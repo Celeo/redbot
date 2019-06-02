@@ -3,6 +3,7 @@
 //! Get a post struct with:
 //!
 //! TODO
+
 use super::comment::Comment;
 use super::user::User;
 use crate::{Api, ApiError};
@@ -23,7 +24,7 @@ pub struct Post<'a> {
 }
 
 impl<'a> Post<'a> {
-    pub fn add_comment(&self, message: &str) -> Result<Comment, ApiError> {
+    pub fn add_comment(&self, _message: &str) -> Result<Comment, ApiError> {
         unimplemented!()
     }
 }

@@ -20,7 +20,7 @@ pub struct Comment<'a> {
 }
 
 impl<'a> Comment<'a> {
-    pub fn reply(&self, message: &str) -> Result<Comment, ApiError> {
+    pub fn reply(&self, _message: &str) -> Result<Comment, ApiError> {
         unimplemented!()
     }
 }

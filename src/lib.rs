@@ -45,7 +45,7 @@ pub use query_listing::QueryListingRequest;
 pub mod errors;
 pub use errors::ApiError;
 pub mod models;
-pub use models::subreddit::Subreddit;
+pub use models::{subreddit::Subreddit, user::User};
 
 const RATE_LIMIT_HEADER_NAMES: [&str; 3] = [
     "X-Ratelimit-Used",
@@ -66,6 +66,7 @@ const RATE_LIMIT_HEADER_NAMES: [&str; 3] = [
 /// 'script' type application that you create on the Reddit
 /// website, [here](https://www.reddit.com/prefs/apps/).
 #[derive(Debug, Deserialize, PartialEq, Clone)]
+#[cfg_attr(test, derive(Default))]
 pub struct Config {
     /// Account username
     pub username: String,
@@ -190,14 +191,32 @@ impl Api {
     }
 
     /// Returns the account's username from the 'api/v1/me' endpoint.
-    fn get_whoami(&self) -> Result<Value, ApiError> {
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let whoami = match api.get_whoami() {
+    ///     Ok(data) => data,
+    ///     Err(err) => panic!(err),
+    /// };
+    /// ```
+    pub fn get_whoami(&self) -> Result<Value, ApiError> {
         let mut resp = self.query("GET", "api/v1/me", None, None)?;
         let data: Value = resp.json()?;
         Ok(data)
     }
 
     /// Returns the username from the stored whoami data.
-    fn get_username(&self) -> Option<String> {
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let username = match api.get_username() {
+    ///     Ok(data) => data,
+    ///     Err(err) => panic!(err),
+    /// };
+    /// ```
+    pub fn get_username(&self) -> Option<String> {
         Some(self.whoami.as_ref()?["name"].as_str().unwrap().to_owned())
     }
 
@@ -300,6 +319,10 @@ impl Api {
             Some(fd) => req.form(&fd).send()?,
             None => req.send()?,
         };
+        let status = resp.status();
+        if status.is_client_error() || status.is_server_error() {
+            return Err(ApiError::from(format!("Error code {}", status.as_str(),)));
+        }
         self.process_response_headers(&resp.headers());
         Ok(resp)
     }
@@ -355,7 +378,7 @@ impl Api {
             let mut resp = req.send()?;
             if resp.status().is_client_error() || resp.status().is_server_error() {
                 return Err(ApiError::from(format!(
-                    "Server error, code {}",
+                    "Error code {}",
                     resp.status().as_str()
                 )));
             }
@@ -390,13 +413,6 @@ impl Api {
             Some(vec![("query", name), ("exact", "false")]),
             None,
         )?;
-        let status = resp.status();
-        if status.is_client_error() || status.is_server_error() {
-            return Err(ApiError::from(format!(
-                "Server error, code {}",
-                status.as_str(),
-            )));
-        }
         let data: Value = resp.json()?;
         Ok(data["names"]
             .as_array()
@@ -433,6 +449,31 @@ impl Api {
         }
         Err(ApiError::from(String::from("Subreddit not found")))
     }
+
+    /// Get a user by their name.
+    ///
+    /// Queries the user's "about" page to verify valid username.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - username
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let user = match api.get_user("some-username") {
+    ///     Ok(u) => u,
+    ///     Err(err) => panic!(err),
+    /// }
+    /// ```
+    pub fn get_user(&self, name: &str) -> Result<User, ApiError> {
+        let mut resp = self.query("GET", &format!("user/{}/about", name), None, None)?;
+        let data: Value = resp.json()?;
+        Ok(User {
+            api: self,
+            about: data,
+        })
+    }
 }
 
 /// the program's API access information.
@@ -454,13 +495,7 @@ mod tests {
     use tempfile;
 
     fn get_config() -> Config {
-        Config {
-            username: String::new(),
-            password: String::new(),
-            user_agent: String::new(),
-            client_id: String::new(),
-            client_secret: String::new(),
-        }
+        std::default::Default::default()
     }
 
     fn get_api() -> Api {
