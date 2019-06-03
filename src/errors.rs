@@ -1,4 +1,6 @@
-//! Error handling. Includes a custom error type `ApiError` that
+//! Error handling.
+//!
+//! Includes a custom error type `ApiError` that
 //! contains conversions from the underlying error types that the
 //! libraries that this library relies on can generate.
 
@@ -9,7 +11,9 @@ use std::fmt;
 /// Wrapper for errors.
 #[derive(Debug, PartialEq)]
 pub struct ApiError {
+    /// Source of the error.
     pub source: String,
+    /// Message that details the problem.
     pub message: String,
 }
 

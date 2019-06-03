@@ -8,8 +8,7 @@
 
 use crate::{Api, ApiError, QueryListingRequest, Value};
 
-/// Maps to a single subreddit. Contains methods for reading and
-/// writing to subreddit-specific APIs.
+/// Maps to a single subreddit.
 #[derive(Clone)]
 pub struct Subreddit<'a> {
     /// Rerefence to the source `Api` struct. Used for calling API endpoints.

@@ -4,10 +4,10 @@
 //!
 //! TODO
 
-use super::comment::Comment;
 use super::user::User;
-use crate::{Api, ApiError};
+use crate::Api;
 
+/// Maps to a single post, either link or text.
 #[derive(Clone)]
 pub struct Post<'a> {
     /// Rerefence to the source `Api` struct. Used for calling API endpoints.
@@ -23,11 +23,7 @@ pub struct Post<'a> {
     pub text: Option<String>,
 }
 
-impl<'a> Post<'a> {
-    pub fn add_comment(&self, _message: &str) -> Result<Comment, ApiError> {
-        unimplemented!()
-    }
-}
+impl<'a> Post<'a> {}
 
 #[cfg(test)]
 mod tests {}

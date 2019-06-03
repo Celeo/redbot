@@ -5,8 +5,9 @@
 //! TODO
 
 use super::user::User;
-use crate::{Api, ApiError};
+use crate::Api;
 
+/// Maps to a single comment.
 #[derive(Clone)]
 pub struct Comment<'a> {
     /// Rerefence to the source `Api` struct. Used for calling API endpoints.
@@ -19,11 +20,7 @@ pub struct Comment<'a> {
     pub text: Option<String>,
 }
 
-impl<'a> Comment<'a> {
-    pub fn reply(&self, _message: &str) -> Result<Comment, ApiError> {
-        unimplemented!()
-    }
-}
+impl<'a> Comment<'a> {}
 
 #[cfg(test)]
 mod tests {}

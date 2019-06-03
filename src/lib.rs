@@ -2,11 +2,14 @@
 //!
 //! First, create a [`Config`] struct. Then, use it to create an
 //! [`Api`] struct, which exposes several methods for querying
-//! the API.
+//! the API, including the [`models`] module, which contains structs
+//! that map to Reddit objects, simplifying the interaction with the
+//! Reddit API.
 //!
 //! [Reddit API]: https://www.reddit.com/dev/api
 //! [`Config`]: struct.Config.html
 //! [`Api`]: struct.Api.html
+//! [`models`]: models/index.html
 //!
 //! # Example
 //!
@@ -30,6 +33,8 @@
 //!     println!("{:?}", karma_breakdown);
 //! }
 //! ```
+
+#![warn(missing_docs)]
 
 use log::debug;
 

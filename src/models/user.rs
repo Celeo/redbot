@@ -6,9 +6,10 @@
 //! let user = api.get_user("some-username")?;
 //! ```
 
-use crate::{Api, ApiError};
+use crate::Api;
 use serde_json::Value;
 
+/// Maps to a single user.
 #[derive(Clone)]
 pub struct User<'a> {
     /// Rerefence to the source `Api` struct. Used for calling API endpoints.
@@ -27,11 +28,6 @@ impl<'a> User<'a> {
     /// ```
     pub fn name(&self) -> String {
         self.about["data"]["name"].as_str().unwrap().to_owned()
-    }
-
-    // TODO
-    pub fn send_message(&self, _message: &str) -> Result<(), ApiError> {
-        unimplemented!()
     }
 }
 
