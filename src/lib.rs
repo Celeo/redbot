@@ -1,12 +1,16 @@
-//! This crate is used to query the [Reddit API](https://www.reddit.com/dev/api).
+//! This crate is used to query the [Reddit API].
 //!
-//! First, create a [`Config`](struct.Config.html) struct. Then, use it to create an
-//! [`Api`](struct.Api.html) struct, which exposes several methods for querying
+//! First, create a [`Config`] struct. Then, use it to create an
+//! [`Api`] struct, which exposes several methods for querying
 //! the API.
+//!
+//! [Reddit API]: https://www.reddit.com/dev/api
+//! [`Config`]: struct.Config.html
+//! [`Api`]: struct.Api.html
 //!
 //! # Example
 //!
-//! ```
+//! ```rust,no_run,ignore
 //! use redbot::{Api, Config, Value};
 //!
 //! fn main() {
@@ -29,23 +33,23 @@
 
 use log::debug;
 
-pub use reqwest::Method;
+use reqwest::Method;
 use reqwest::{
     self,
     header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT},
 };
 use serde::Deserialize;
-pub use serde_json::Value;
+use serde_json::Value;
 use std::collections::HashMap;
 use std::{fs::File, io::prelude::*};
 
 pub mod query_listing;
-pub use query_listing::QueryListingRequest;
+use query_listing::QueryListingRequest;
 
 pub mod errors;
-pub use errors::ApiError;
+use errors::ApiError;
 pub mod models;
-pub use models::{subreddit::Subreddit, user::User};
+use models::{subreddit::Subreddit, user::User};
 
 const RATE_LIMIT_HEADER_NAMES: [&str; 3] = [
     "X-Ratelimit-Used",
@@ -60,11 +64,13 @@ const RATE_LIMIT_HEADER_NAMES: [&str; 3] = [
 /// strings that you'd use to log into the account on the
 /// Reddit website. The `user_agent` field is for setting
 /// the 'User Agent' header value to use when communicating
-/// with the API, as per the API usage requirements found
-/// [here](https://github.com/reddit-archive/reddit/wiki/API#rules).
+/// with the API, as per the [API usage requirements].
 /// The `client_id` and `client_secret` fields are for a
-/// 'script' type application that you create on the Reddit
-/// website, [here](https://www.reddit.com/prefs/apps/).
+/// 'script' type application that you create on the [Reddit
+/// website].
+///
+/// [API usage requirements]: https://github.com/reddit-archive/reddit/wiki/API#rules
+/// [Reddit website]: https://www.reddit.com/prefs/apps/
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 #[cfg_attr(test, derive(Default))]
 pub struct Config {
@@ -81,6 +87,7 @@ pub struct Config {
 }
 
 impl Config {
+
     /// Attempt to load the configuration from a file.
     ///
     /// # Arguments
@@ -103,7 +110,7 @@ impl Config {
     ///
     /// Retrieve the config with:
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let config = Config::load_config("config.json")?;
     /// ```
     pub fn load_config(path: &str) -> Result<Self, ApiError> {
@@ -134,7 +141,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let config = Config::load_config().expect("Could not load config");
     /// let mut api = Api::new(config);
     /// ```
@@ -156,7 +163,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// if let Err(err) = api.do_login() {
     ///     panic!("Could not get an access token: {}", err);
     /// }
@@ -194,7 +201,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let whoami = match api.get_whoami() {
     ///     Ok(data) => data,
     ///     Err(err) => panic!(err),
@@ -210,7 +217,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let username = match api.get_username() {
     ///     Ok(data) => data,
     ///     Err(err) => panic!(err),
@@ -272,15 +279,17 @@ impl Api {
     /// # Arguments
     ///
     /// * `method` - A string representing an HTTP method, capable of being parsed by
-    /// [reqwest](https://docs.rs/reqwest/latest/reqwest/struct.Method.html#method.from_bytes), i.e. "GET", "POST", etc.
+    /// [reqwest], i.e. "GET", "POST", etc.
     /// * `path` - A relative URL path (everything after reddit.com/)
     /// * `query` - An optional collection of query parameters
     /// * `form_data` - An optional collection of form data to submit
     ///
+    /// [reqwest: https://docs.rs/reqwest/latest/reqwest/struct.Method.html#method.from_bytes
+    ///
     /// # Examples
     ///
     /// Get data from an endpoint:
-    /// ```
+    /// ```rust,no_run,ignore
     /// match api.query("GET", "some/endpoint", None, None) {
     ///     Ok(data) => println!("{}", data),
     ///     Err(err) => panic!(err),
@@ -289,7 +298,7 @@ impl Api {
     ///
     /// Post data to an endpoint:
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let mut post_data = HashMap::new();
     /// post_data.insert("id", "t3_aaaaaa");
     /// match api.query("POST", "api/save", None, Some(post_data)) {
@@ -330,15 +339,19 @@ impl Api {
     /// Query the Reddit API via a listing endpoint.
     ///
     /// Information on listing endpoints can be found in the
-    /// [offial docs](https://www.reddit.com/dev/api#listings).
+    /// [offial docs].
+    ///
+    /// [offial docs]: https://www.reddit.com/dev/api#listings
     ///
     /// # Arguments
     ///
-    /// * `ql` - A [`QueryListingRequest`](query_listing/struct.QueryListingRequest.html) struct
+    /// * `ql` - A [`QueryListingRequest`] struct
+    ///
+    /// [`QueryListingRequest`]: query_listing/struct.QueryListingRequest.html
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let ql = QueryListingRequest::new("r/rust/hot", 1, 1);
     /// let data: Vec<Value> = api.query_listing(ql).unwrap();
     /// println!("{:?}", data);
@@ -400,7 +413,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let names = match api.search_for_subreddit("rust") {
     ///     Ok(names) => names,
     ///     Err(err) => panic!(err),
@@ -434,7 +447,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let subreddit = match api.get_subreddit("rust") {
     ///     Ok(sr) => sr,
     ///     Err(err) => panic!(err),
@@ -460,7 +473,7 @@ impl Api {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let user = match api.get_user("some-username") {
     ///     Ok(u) => u,
     ///     Err(err) => panic!(err),

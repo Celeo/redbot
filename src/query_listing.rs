@@ -1,15 +1,18 @@
-//! Structs for use in making and viewing [listing](https://www.reddit.com/dev/api#listings) requests and responses.
+//! Structs for use in making and viewing [listing] requests and responses.
+//!
+//! [listing]: https://www.reddit.com/dev/api#listings
 //!
 //! # Examples
 //!
 //! Simple:
-//! ```
+//!
+//! ```rust,no_run,ignore
 //! let ql = QueryListingRequest::new("r/rust/hot", 1, 1);
 //! ```
 //!
 //! More complex:
 //!
-//! ```
+//! ```rust,no_run,ignore
 //! let ql = QueryListingRequest::new("r/rust/hot", 25, 2)
 //!     .after(Some("t3_aaaaa"))
 //!     .count(12)

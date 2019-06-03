@@ -2,7 +2,7 @@
 //!
 //! Get a user struct with:
 //!
-//! ```
+//! ```rust,no_run,ignore
 //! let user = api.get_user("some-username")?;
 //! ```
 
@@ -22,7 +22,7 @@ impl<'a> User<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let name = user.name();
     /// ```
     pub fn name(&self) -> String {

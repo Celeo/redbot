@@ -2,7 +2,7 @@
 //!
 //! Get a subreddit struct with:
 //!
-//! ```
+//! ```rust,no_run,ignore
 //! let subreddit = api.get_subreddit("name")?;
 //! ```
 
@@ -27,7 +27,7 @@ impl<'a> Subreddit<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust,no_run,ignore
     /// let posts = subreddit.get_top(25)?;
     /// ```
     pub fn get_top(&self, count: u64) -> Result<Vec<Value>, ApiError> {
